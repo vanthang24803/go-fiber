@@ -10,28 +10,27 @@ import (
 
 var db *mongo.Database
 
-func Connect(connection string) error {
-
+func ConnectDB(connection string) (db *mongo.Database, err error) {
 	clientOptions := options.Client().ApplyURI(connection)
-
 	client, err := mongo.Connect(context.Background(), clientOptions)
-
 	if err != nil {
-		return err
+		infra.Msg.Error("Error while connecting to MongoDB:", err)
+		return nil, err
 	}
 
 	err = client.Ping(context.Background(), nil)
-
 	if err != nil {
-		return err
+		infra.Msg.Error("MongoDB ping failed:", err)
+		return nil, err
 	}
 
 	db = client.Database("db")
+	if db == nil {
+		infra.Msg.Error("Database instance is nil after connection")
+	}
 
 	infra.Msg.Info("Connected to MongoDB successfully!")
-
-	return nil
-
+	return db, nil
 }
 
 func GetDatabase() *mongo.Database {

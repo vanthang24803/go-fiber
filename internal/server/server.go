@@ -17,7 +17,7 @@ func init() {
 
 	config := infra.GetConfig()
 
-	err := database.Connect(config.DatabaseConnection)
+	db, err := database.ConnectDB(config.DatabaseConnection)
 
 	if err != nil {
 		infra.Msg.Errorf("Error connecting to database: %s", err.Error())
@@ -32,7 +32,7 @@ func init() {
 
 	v1 := app.Group("/api/v1")
 
-	routes.ApplyRoutes(v1)
+	routes.InitRoutes(v1, db)
 
 	app.Use(interceptor.NotFoundRoute())
 

@@ -13,3 +13,16 @@ To run the app, you can use the following command:
 ```bash
     go run cmd/main.go
 ```
+
+## Seed data
+
+For seed data, you can use the Python scripts in the `seed` folder. The scripts use the `uv` package manager to install the required packages and seed the database with the data.
+
+Before running the seed script, you need to have the `uv` package manager installed and configured seed number.
+
+To run the seed script, you can use the following command:
+
+```bash
+    cd seeds
+    uv run main.py
+```
