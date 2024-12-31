@@ -4,21 +4,21 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/vanthang24803/go-api/domain"
-	"github.com/vanthang24803/go-api/queries"
+	"github.com/vanthang24803/go-api/functions"
 	"github.com/vanthang24803/go-api/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type AuthHandler struct {
 	validate    *validator.Validate
-	authService queries.AuthService
+	authService functions.AuthService
 }
 
 // NewAuthHandler initializes a new AuthHandler with dependencies.
 func NewAuthHandler(db *mongo.Database) *AuthHandler {
 	return &AuthHandler{
 		validate:    validator.New(),
-		authService: *queries.NewAuthService(db),
+		authService: *functions.NewAuthService(db),
 	}
 }
 

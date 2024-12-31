@@ -3,22 +3,22 @@ package routes
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/vanthang24803/go-api/functions"
 	"github.com/vanthang24803/go-api/internal/schema"
 	"github.com/vanthang24803/go-api/middlewares"
-	"github.com/vanthang24803/go-api/queries"
 	"github.com/vanthang24803/go-api/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type MeHandler struct {
 	validate *validator.Validate
-	meSevice queries.MeService
+	meSevice functions.MeService
 }
 
 func NewMeHandler(db *mongo.Database) *MeHandler {
 	return &MeHandler{
 		validate: validator.New(),
-		meSevice: *queries.NewMeService(db),
+		meSevice: *functions.NewMeService(db),
 	}
 }
 

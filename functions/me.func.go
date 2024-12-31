@@ -1,4 +1,4 @@
-package queries
+package functions
 
 import (
 	"go.mongodb.org/mongo-driver/mongo"
