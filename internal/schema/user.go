@@ -9,5 +9,4 @@ type User struct {
 	HashPassword string             `json:"-" bson:"hash_password"`
 	FirstName    string             `json:"first_name" bson:"first_name"`
 	LastName     string             `json:"last_name" bson:"last_name"`
-	Age          int                `json:"age" bson:"age"`
 }
