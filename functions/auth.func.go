@@ -2,6 +2,7 @@ package functions
 
 import (
 	"context"
+	"time"
 
 	"github.com/vanthang24803/go-api/domain"
 	"github.com/vanthang24803/go-api/internal/schema"
@@ -62,19 +63,55 @@ func (s *AuthService) LoginHandler(request *domain.LoginRequest) (*utils.TokenRe
 		return nil, utils.NewAppError(500, err.Error())
 	}
 
-	// Chaeck password
+	// Check password
 	err = bcrypt.CompareHashAndPassword([]byte(user.HashPassword), []byte(request.Password))
 	if err != nil {
 		return nil, utils.NewAppError(401, "Username or password is incorrect")
 	}
 
+	// Check for valid refresh token
+	var refreshToken string
+	var needNewRefreshToken bool = true
+
+	for _, token := range user.Tokens {
+		if token.Name == "refresh_token" && token.ExpiredAt.After(time.Now()) {
+			refreshToken = token.Value
+			needNewRefreshToken = false
+			break
+		}
+	}
+
 	// Generate JWT
-	token, err := utils.GenerateJWT(&user)
+	var token *utils.TokenResponse
+
+	token, err = utils.GenerateJWT(&user)
 
 	if err != nil {
 		return nil, utils.NewAppError(400, err.Error())
 	}
 
-	//Return
+	if needNewRefreshToken {
+		// Add new refresh token to user's tokens
+		user.Tokens = append(user.Tokens, schema.Token{
+			Name:      "refresh_token",
+			Value:     token.RefreshToken,
+			ExpiredAt: time.Now().Add(time.Hour * 24 * 7), // 7 days expiration
+		})
+
+		// Update user in database
+		_, err = s.db.Collection("users").UpdateOne(
+			context.Background(),
+			bson.M{"_id": user.ID},
+			bson.M{"$set": bson.M{"tokens": user.Tokens}},
+		)
+		if err != nil {
+			return nil, utils.NewAppError(500, "Failed to update user tokens")
+		}
+	} else {
+		// Generate new access token with existing refresh token
+		token.RefreshToken = refreshToken
+	}
+
+	// Return
 	return token, nil
 }

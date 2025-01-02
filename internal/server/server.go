@@ -26,6 +26,8 @@ func init() {
 	app.Use(interceptor.Logger())
 	app.Use(interceptor.ErrorHandler())
 
+	app.Static("/", "./uploads")
+
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(utils.NewResponse(200, "Hello world!"))
 	})
