@@ -29,6 +29,7 @@ func GenerateJWT(user *schema.User) (*TokenResponse, error) {
 	now := time.Now()
 
 	// Tạo access token
+	rolesStr := strings.Join(user.Roles, ",") // Chuyển đổi mảng Roles thành chuỗi
 	accessPayload := JwtPayload{
 		Sub:      user.ID,
 		Iat:      now.Unix(),
@@ -41,7 +42,7 @@ func GenerateJWT(user *schema.User) (*TokenResponse, error) {
 		"iat":      accessPayload.Iat,
 		"exp":      accessPayload.Exp,
 		"username": accessPayload.Username,
-		"roles":    accessPayload.Roles,
+		"roles":    rolesStr, // Nhét roles dưới dạng chuỗi
 	})
 
 	accessTokenString, err := accessToken.SignedString([]byte(config.JWTSecret))
@@ -101,12 +102,18 @@ func ValidateJWT(tokenString string) (*JwtPayload, error) {
 			return nil, fmt.Errorf("invalid sub format: %v", err)
 		}
 
+		rolesStr, ok := claims["roles"].(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid roles format")
+		}
+		roles := strings.Split(rolesStr, ",")
+
 		payload := &JwtPayload{
 			Sub:      subID,
 			Iat:      int64(claims["iat"].(float64)),
 			Exp:      int64(claims["exp"].(float64)),
 			Username: claims["username"].(string),
-			Roles:    claims["roles"].([]string),
+			Roles:    roles,
 		}
 		return payload, nil
 	}
