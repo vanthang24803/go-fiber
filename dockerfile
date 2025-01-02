@@ -1,9 +1,12 @@
-FROM golang:1.20-alpine AS build
+# Giai đoạn build
+FROM golang:1.20-alpine AS builder
+
+RUN apk add --no-cache git
 
 ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64 \
-    GOPROXY=https://proxy.golang.org,direct
+    GOPROXY=https://proxy.golang.org,https://goproxy.io,direct
 
 WORKDIR /app
 
@@ -13,16 +16,16 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o app .
+RUN go build -o main .
 
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates tzdata
 
-WORKDIR /app
+WORKDIR /root/
 
-COPY --from=build /app/app .
+COPY --from=builder /app/main .
 
 EXPOSE 4005
 
-CMD ["./app"]
+CMD ["./main"]
